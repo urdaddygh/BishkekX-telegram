@@ -37,6 +37,7 @@ function getSession(userId) {
       bank: '',
       xbetIdGlobal: '',
       xbetKey: '',
+      userId : null,
     });
   }
   return sessions.get(userId);
@@ -69,7 +70,7 @@ const defaultKeyboard = new Keyboard()
 const cancelKeyboard = new Keyboard().text("Отмена").resized();
 
 bot.command("start", async (ctx) => {
-  // console.log(ctx.chat)
+  // console.log(ctx.from)
   if (ctx.chat.type !== "group" && ctx.chat.type !== "channel") {
     clearSession(ctx.from.id);
     const userId = ctx.from.id;
@@ -281,8 +282,8 @@ bot.hears("ПРАВИЛА", async (ctx) => {
 
 bot.callbackQuery("accept", async (ctx) => {
     const session = getSession(ctx.from.id);
-    if(session.isRefill&&session.waitAnswer){
-    bot.api.sendMessage(ctx.from.id, "Транзакция прошла✅");
+    if(session.isRefill && session.waitAnswer && session.userId){
+    bot.api.sendMessage(session.userId, "Транзакция прошла✅");
     session.isRefill = false;
     session.waitAnswer = false;
     clearSession(ctx.from.id);
@@ -290,8 +291,8 @@ bot.callbackQuery("accept", async (ctx) => {
 });
 bot.callbackQuery("reject", async (ctx) => {
   const session = getSession(ctx.from.id);
-  if(session.isRefill&&session.waitAnswer){
-  bot.api.sendMessage(ctx.from.id, "Транзакция отклонена❌");
+  if(session.isRefill && session.waitAnswer && session.userId){
+  bot.api.sendMessage(session.userId, "Транзакция отклонена❌");
   session.isRefill = false;
   session.waitAnswer = false;
   clearSession(ctx.from.id);
@@ -310,7 +311,7 @@ bot.on(":photo", async (ctx) => {
     const caption = `Чек от пользователя:\nИмя: ${
       userInfo?.first_name ?? "Отсутствует"
     }\nЛогин: ${userInfo?.username ?? "Отсутствует"}\nЧат ID: ${
-      ctx.chatId
+      ctx.from.id
     }\n\n1XBET ID: ${session.xbetIdGlobal}\nСпособ: ${
       session.bank
     }\nСумма пополнения: ${session.sumMany}\n\nСмена: ${shift}`;
@@ -322,6 +323,7 @@ bot.on(":photo", async (ctx) => {
 
       session.waitCheck = false;
       session.waitAnswer = true;
+      session.userId = ctx.from.id; 
 
     await bot.api.sendPhoto(reffilGroupId, highestQualityPhoto.file_id, {
       caption: caption,
@@ -339,6 +341,7 @@ bot.on("msg:text", async (ctx) => {
   const userInfo = ctx.update.message.from;
   const text = ctx.update.message.text;
   let textToNumber;
+  // console.log(session);
   if (!isNaN(Number(text))) {
     textToNumber = parseInt(text);
     // console.log("parse to int = ", typeof textToNumber);
@@ -474,7 +477,18 @@ bot.on("msg:text", async (ctx) => {
     return await ctx.reply("Введите сумму вывода средств(СОМ)");
   }
   
+  if(session.waitAnswer&&session.isRefill){
+    return await ctx.reply("Проверяем чек...");
+  }
 });
+
+bot.on("msg", async (ctx)=>{
+  const session = getSession(ctx.from.id);
+  // console.log('че там', session.waitAnswer)
+  if(session.waitAnswer&&session.isRefill){
+    return await ctx.reply("Проверяем чек...");
+  }
+})
 
 bot.catch((err) => {
   const ctx = err.ctx;
