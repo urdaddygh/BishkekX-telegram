@@ -280,23 +280,56 @@ bot.hears("ПРАВИЛА", async (ctx) => {
   });
 });
 
-bot.callbackQuery("accept", async (ctx) => {
-    const session = getSession(ctx.from.id);
-    if(session.isRefill && session.waitAnswer && session.userId){
-    bot.api.sendMessage(session.userId, "Транзакция прошла✅");
-    session.isRefill = false;
-    session.waitAnswer = false;
-    clearSession(ctx.from.id);
+// bot.callbackQuery("accept", async (ctx) => {
+//     const session = getSession(ctx.from.id);
+//     console.log(session);
+//     if(session.isRefill && session.waitAnswer && session.userId){
+//     bot.api.sendMessage(session.userId, "Транзакция прошла✅");
+//     session.isRefill = false;
+//     session.waitAnswer = false;
+//     clearSession(session.userId);
+//     console.log(session);
+//   }
+// });
+// bot.callbackQuery("reject", async (ctx) => {
+//   const session = getSession(ctx.from.id);
+//   if(session.isRefill && session.waitAnswer && session.userId){
+//   bot.api.sendMessage(session.userId, "Транзакция отклонена❌");
+//   session.isRefill = false;
+//   session.waitAnswer = false;
+//   clearSession(ctx.from.id);
+// }
+// });
+
+bot.on("callback_query:data", async (ctx) => {
+  const callbackData = ctx.callbackQuery.data;
+  const [action, userId] = callbackData.split("_");  // Разделяем действие и ID пользователя
+  let userIdToNumber;
+  // console.log(session);
+  if (!isNaN(Number(userId))) {
+    userIdToNumber = parseInt(userId);
+    // console.log("parse to int = ", typeof textToNumber);
   }
-});
-bot.callbackQuery("reject", async (ctx) => {
-  const session = getSession(ctx.from.id);
-  if(session.isRefill && session.waitAnswer && session.userId){
-  bot.api.sendMessage(session.userId, "Транзакция отклонена❌");
-  session.isRefill = false;
-  session.waitAnswer = false;
-  clearSession(ctx.from.id);
-}
+  const session = getSession(userIdToNumber);
+  // console.log(userIdToNumber);
+  // console.log(session);
+  if (typeof userIdToNumber === "number"){
+    if(session.isRefill && session.waitAnswer){
+      if (action === "accept") {
+        await bot.api.sendMessage(userId, "Транзакция прошла✅");
+      } else if (action === "reject") {
+        await bot.api.sendMessage(userId, "Транзакция отклонена❌");
+      }
+      await ctx.editMessageReplyMarkup({
+        reply_markup: null,  // Очищаем клавиатуру
+      });
+      session.isRefill = false;
+      session.waitAnswer = false;
+      clearSession(userIdToNumber);
+    }
+  }else{
+    console.log('userId is not number = ', userIdToNumber)
+  }
 });
 
 bot.on(":photo", async (ctx) => {
@@ -318,8 +351,8 @@ bot.on(":photo", async (ctx) => {
     // Отправляем фотографию в другую группу
 
     const acceptRejectKeyboard = new InlineKeyboard()
-      .text("Принять", "accept")
-      .text("Отклонить", "reject");
+      .text("Принять", `accept_${ctx.from.id}`)
+      .text("Отклонить", `reject_${ctx.from.id}`);
 
       session.waitCheck = false;
       session.waitAnswer = true;
@@ -329,7 +362,8 @@ bot.on(":photo", async (ctx) => {
       caption: caption,
       reply_markup: acceptRejectKeyboard,
     });
-
+    // console.log(ctx.from.id);
+    // console.log(session);
     return await ctx.reply("Отлично! Средства поступят после проверки чека", {
       reply_markup:{remove_keyboard:true}
     });
