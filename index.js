@@ -8,6 +8,7 @@ const {
   InlineKeyboard,
   InputFile,
 } = require("grammy");
+const texts = require('./texts');
 
 const bot = new Bot(process.env.BOT_API_KEY);
 const sessions = new Map();
@@ -53,10 +54,13 @@ const infoChannelId = "-1002413010153";
 const infoChannelLink = "https://t.me/+GdLPdk4h6oFlOGUy";
 const adminTeg = "@BishkekXadmin";
 const resolver = "@beckfild";
+const minSum = 10;
+const maxSum = 1000000;
 
-let mbankRequisites = '504061111';
-let optimaRequisites = '4169585351289654';
-let bakaiRequisites = '7760611111';
+let mbankRequisites = '0500229666';
+let optimaRequisites = '4169585355144709';
+let bakaiRequisites = '0500229666';
+let oDengi = '+996 (504) 061-111';
 let shift = 'Не выбран';
 
 const defaultKeyboard = new Keyboard()
@@ -65,6 +69,8 @@ const defaultKeyboard = new Keyboard()
   .row()
   .text("КОНТАКТЫ")
   .text("ПРАВИЛА")
+  // .row()
+  .text("БОНУСЫ")
   .resized();
 
 const cancelKeyboard = new Keyboard().text("Отмена").resized();
@@ -84,8 +90,9 @@ bot.command("start", async (ctx) => {
         memberInfo.status === "administrator" ||
         memberInfo.status === "creator"
       ) {
-        await ctx.reply("Приветствую на кассе 1Хбет", {
+        await ctx.reply(texts.WELCOME, {
           reply_markup: defaultKeyboard,
+          
         });
       } else {
         const inlineKeyboard = new InlineKeyboard().url(
@@ -120,7 +127,7 @@ bot.callbackQuery("subscribed", async (ctx) => {
         memberInfo.status === "administrator" ||
         memberInfo.status === "creator"
       ) {
-        await ctx.reply("Приветствую на кассе 1Хбет", {
+        await ctx.reply(texts.WELCOME, {
           reply_markup: defaultKeyboard,
         });
         await ctx.deleteMessage();
@@ -144,9 +151,10 @@ bot.callbackQuery("subscribed", async (ctx) => {
 bot.command("edil", async (ctx) => {
   if (ctx.chat.type === "group") {
     shift = 'Эдил';
-    mbankRequisites='321321321'
-    optimaRequisites='321321312312'
-    bakaiRequisites='321321321'
+    mbankRequisites='0500229666';
+    optimaRequisites='4169585355144709';
+    oDengi = '+996 (504) 061-111';
+    bakaiRequisites='0500229666';
     await ctx.reply("Приветствую Эдил, переключаю на вашу смену");
   }
 });
@@ -154,9 +162,10 @@ bot.command("edil", async (ctx) => {
 bot.command("daniyar", async (ctx) => {
   if (ctx.chat.type === "group") {
     shift = 'Данияр';
-    mbankRequisites='504061111'
-    optimaRequisites='4169585351289654'
-    bakaiRequisites='7760611111'
+    mbankRequisites='0504061111';
+    optimaRequisites='4169585351289654';
+    oDengi = '-';
+    bakaiRequisites='7760611111';
     await ctx.reply("Приветствую Данияр, переключаю на вашу смену");
   }
 });
@@ -168,7 +177,7 @@ bot.command("daniyar", async (ctx) => {
 bot.hears("Отмена", async (ctx) => {
   if (ctx.chat.type !== "group"&& ctx.chat.type !== "channel") {
     clearSession(ctx.from.id);
-    await ctx.reply("Операции отменены", {
+    await ctx.reply(texts.WELCOME, {
       reply_markup: defaultKeyboard,
     });
   }
@@ -219,7 +228,7 @@ bot.callbackQuery("optima_button", async (ctx) => {
 });
 
 bot.hears("ВЫВЕСТИ", async (ctx) => {
-  await ctx.reply("Укажите удобный вам способ вывод средств", {
+  await ctx.reply("Укажите удобный вам способ вывода средств", {
     reply_markup: {
       keyboard: cancelKeyboard.build(),
       one_time_keyboard: true,
@@ -242,19 +251,19 @@ bot.hears("ВЫВЕСТИ", async (ctx) => {
 
 bot.callbackQuery("mbank_button_output", async (ctx) => {
   const session = getSession(ctx.from.id);
-  await ctx.reply("Введите реквизиты для выбранного вами банка:");
+  await ctx.reply(texts.ENTER_REQUISITES_BY_BANK);
   session.isBankChosen = true;
   session.bank = 'MBANK';
 });
 bot.callbackQuery("bakai_button_output", async (ctx) => {
   const session = getSession(ctx.from.id);
-  await ctx.reply("Введите реквизиты для выбранного вами банка:");
+  await ctx.reply(texts.ENTER_REQUISITES_BY_BANK);
   session.isBankChosen = true;
   session.bank = 'Bakai';
 });
 bot.callbackQuery("optima_button_output", async (ctx) => {
   const session = getSession(ctx.from.id);
-  await ctx.reply("Введите реквизиты для выбранного вами банка:");
+  await ctx.reply(texts.ENTER_REQUISITES_BY_BANK);
   session.isBankChosen = true;
   session.bank = 'Optima';
   // console.log(session);
@@ -279,7 +288,15 @@ bot.hears("ПРАВИЛА", async (ctx) => {
     // },
   });
 });
-
+bot.hears("БОНУСЫ", async (ctx) => {
+  await ctx.reply(`Бонусов пока нет`, {
+    // reply_markup: {
+    //   keyboard: cancelKeyboard.build(),
+    //   one_time_keyboard: true,
+    //   resize_keyboard: true,
+    // },
+  });
+});
 // bot.callbackQuery("accept", async (ctx) => {
 //     const session = getSession(ctx.from.id);
 //     console.log(session);
@@ -385,15 +402,15 @@ bot.on("msg:text", async (ctx) => {
   if (session.isBankChosen && session.isRefill) {
     if (typeof textToNumber === "number") {
       //   console.log("text is number");
-      if (textToNumber >= 10 && textToNumber <= 10000) {
+      if (textToNumber >= minSum && textToNumber <= maxSum) {
         session.isBankChosen = false;
         session.isCashWritten = true;
         session.sumMany = textToNumber;
-        await ctx.reply("Введите ваш ID(номер счета от 1XBET)");
+        await ctx.reply(texts.ENTER_XBET_ID);
         return await ctx.replyWithPhoto(new InputFile("img/example.jpg"));
       } else {
         await ctx.reply(
-          "Сумма депозита указана некорректна, попробуйте снова \n\nМинимум: 10 сом\nМаксимум: 10000 сом"
+          `Сумма депозита указана некорректна, попробуйте снова \n\nМинимум: ${minSum} сом\nМаксимум: ${maxSum} сом`
         );
       }
     } else {
@@ -459,15 +476,15 @@ bot.on("msg:text", async (ctx) => {
   if (session.isOutput && session.isRequisitesWritten) {
     if (typeof textToNumber === "number") {
       //   console.log("text is number");
-      if (textToNumber >= 10 && textToNumber <= 10000) {
+      if (textToNumber >= minSum && textToNumber <= maxSum) {
         session.isRequisitesWritten = false;
         session.isXbetKeyWritten = true;
         session.sumMany = textToNumber;
-        await ctx.reply("Введите ваш ID(номер счета от 1XBET)");
+        await ctx.reply(texts.ENTER_XBET_ID);
         return await ctx.replyWithPhoto(new InputFile("img/example.jpg"));
       } else {
         await ctx.reply(
-          "Сумма вывода указана некорректна, попробуйте снова \n\nМинимум: 10 сом\nМаксимум: 10000 сом"
+          `Сумма депозита указана некорректна, попробуйте снова \n\nМинимум: ${minSum} сом\nМаксимум: ${maxSum} сом`
         );
       }
     } else {
