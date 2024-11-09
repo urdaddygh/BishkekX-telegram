@@ -53,9 +53,11 @@ const reffilGroupId = "-4598841007";
 const infoChannelId = "-1002413010153";
 const infoChannelLink = "https://t.me/+GdLPdk4h6oFlOGUy";
 const adminTeg = "@BishkekXadmin";
-const resolver = "@beckfild";
-const minSum = 10;
+const resolver = "@KolyanNau";
+const minSumReffill = 35;
+const minSumOutput = 150;
 const maxSum = 1000000;
+const requiredCount = 10;
 
 let mbankRequisites = '0500229666';
 let optimaRequisites = '4169585355144709';
@@ -68,7 +70,7 @@ const defaultKeyboard = new Keyboard()
   .text("ВЫВЕСТИ")
   .row()
   .text("КОНТАКТЫ")
-  .text("ПРАВИЛА")
+  // .text("ПРАВИЛА")
   // .row()
   .text("БОНУСЫ")
   .resized();
@@ -112,7 +114,6 @@ bot.command("start", async (ctx) => {
     }
   }
 });
-
 bot.callbackQuery("subscribed", async (ctx) => {
   clearSession(ctx.from.id);
   if (ctx.chat.type !== "group") {
@@ -279,44 +280,20 @@ bot.hears("КОНТАКТЫ", async (ctx) => {
   });
 });
 
-bot.hears("ПРАВИЛА", async (ctx) => {
-  await ctx.reply(`Правил пока нет`, {
-    // reply_markup: {
-    //   keyboard: cancelKeyboard.build(),
-    //   one_time_keyboard: true,
-    //   resize_keyboard: true,
-    // },
-  });
-});
+// bot.hears("ПРАВИЛА", async (ctx) => {
+//   await ctx.reply(`Правил пока нет`, {
+//     // reply_markup: {
+//     //   keyboard: cancelKeyboard.build(),
+//     //   one_time_keyboard: true,
+//     //   resize_keyboard: true,
+//     // },
+//   });
+// });
 bot.hears("БОНУСЫ", async (ctx) => {
-  await ctx.reply(`Бонусов пока нет`, {
-    // reply_markup: {
-    //   keyboard: cancelKeyboard.build(),
-    //   one_time_keyboard: true,
-    //   resize_keyboard: true,
-    // },
+  await ctx.replyWithVideo(new InputFile("video/bonus.mp4"), {
+    caption: "Введите при регистрации наш промокод: 🎁\nBISHKEKX\nИ получите бонус х2 к первому депозиту 🎁\n\n500 * 2 = 1000 сом\n2000 * 2 = 4000 coм"
   });
 });
-// bot.callbackQuery("accept", async (ctx) => {
-//     const session = getSession(ctx.from.id);
-//     console.log(session);
-//     if(session.isRefill && session.waitAnswer && session.userId){
-//     bot.api.sendMessage(session.userId, "Транзакция прошла✅");
-//     session.isRefill = false;
-//     session.waitAnswer = false;
-//     clearSession(session.userId);
-//     console.log(session);
-//   }
-// });
-// bot.callbackQuery("reject", async (ctx) => {
-//   const session = getSession(ctx.from.id);
-//   if(session.isRefill && session.waitAnswer && session.userId){
-//   bot.api.sendMessage(session.userId, "Транзакция отклонена❌");
-//   session.isRefill = false;
-//   session.waitAnswer = false;
-//   clearSession(ctx.from.id);
-// }
-// });
 
 bot.on("callback_query:data", async (ctx) => {
   const callbackData = ctx.callbackQuery.data;
@@ -402,7 +379,7 @@ bot.on("msg:text", async (ctx) => {
   if (session.isBankChosen && session.isRefill) {
     if (typeof textToNumber === "number") {
       //   console.log("text is number");
-      if (textToNumber >= minSum && textToNumber <= maxSum) {
+      if (textToNumber >= minSumReffill && textToNumber <= maxSum) {
         session.isBankChosen = false;
         session.isCashWritten = true;
         session.sumMany = textToNumber;
@@ -410,7 +387,7 @@ bot.on("msg:text", async (ctx) => {
         return await ctx.replyWithPhoto(new InputFile("img/example.jpg"));
       } else {
         await ctx.reply(
-          `Сумма депозита указана некорректна, попробуйте снова \n\nМинимум: ${minSum} сом\nМаксимум: ${maxSum} сом`
+          `Сумма депозита указана некорректна, попробуйте снова \n\nМинимум: ${minSumReffill} сом\nМаксимум: ${maxSum} сом`
         );
       }
     } else {
@@ -421,7 +398,7 @@ bot.on("msg:text", async (ctx) => {
   if (session.isCashWritten&&session.isRefill) {
     if (typeof textToNumber === "number") {
       // console.log("text is number");
-      if (text.length === 9) {
+      if (text.length === requiredCount) {
         // console.log(text.length, "кол-во символов");
         session.isCashWritten = false;
         session.xbetIdGlobal = text;
@@ -442,7 +419,7 @@ bot.on("msg:text", async (ctx) => {
           }
           return (session.waitCheck = true);
       } else {
-        await ctx.reply("Кол-во цифр должно равняться 9");
+        await ctx.reply(`Кол-во цифр должно равняться ${requiredCount}`);
       }
     } else {
       await ctx.reply("Нужно ввести только цифры");
@@ -476,7 +453,7 @@ bot.on("msg:text", async (ctx) => {
   if (session.isOutput && session.isRequisitesWritten) {
     if (typeof textToNumber === "number") {
       //   console.log("text is number");
-      if (textToNumber >= minSum && textToNumber <= maxSum) {
+      if (textToNumber >= minSumOutput && textToNumber <= maxSum) {
         session.isRequisitesWritten = false;
         session.isXbetKeyWritten = true;
         session.sumMany = textToNumber;
@@ -484,7 +461,7 @@ bot.on("msg:text", async (ctx) => {
         return await ctx.replyWithPhoto(new InputFile("img/example.jpg"));
       } else {
         await ctx.reply(
-          `Сумма депозита указана некорректна, попробуйте снова \n\nМинимум: ${minSum} сом\nМаксимум: ${maxSum} сом`
+          `Сумма депозита указана некорректна, попробуйте снова \n\nМинимум: ${minSumOutput} сом\nМаксимум: ${maxSum} сом`
         );
       }
     } else {
@@ -494,7 +471,7 @@ bot.on("msg:text", async (ctx) => {
 
   if (session.isOutput && session.isXbetKeyWritten) {
     if (typeof textToNumber === "number") {
-      if(text.length === 9){
+      if(text.length === requiredCount){
         session.isXbetKeyWritten = false;
         session.isCashWritten = true;
         session.xbetIdGlobal = text;
@@ -514,7 +491,7 @@ bot.on("msg:text", async (ctx) => {
         // });
         return await ctx.reply("Введите код который вам дал 1XBET");
       }else{
-        await ctx.reply("Кол-во цифр должно равняться 9");
+        await ctx.reply(`Кол-во цифр должно равняться ${requiredCount}`);
       }
     } else {
       await ctx.reply("Введите сумму цифрами");
