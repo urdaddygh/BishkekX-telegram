@@ -57,7 +57,8 @@ const resolver = "@KolyanNau";
 const minSumReffill = 35;
 const minSumOutput = 150;
 const maxSum = 1000000;
-const requiredCount = 10;
+const maxRequiredXbetIdCount = 12;
+const minRequiredXbetIdCount = 9;
 
 let mbankRequisites = '0500229666';
 let optimaRequisites = '4169585355144709';
@@ -77,41 +78,52 @@ const defaultKeyboard = new Keyboard()
 
 const cancelKeyboard = new Keyboard().text("Отмена").resized();
 
+// bot.command("start", async (ctx) => {
+//   // console.log(ctx.from)
+//   if (ctx.chat.type !== "group" && ctx.chat.type !== "channel") {
+//     clearSession(ctx.from.id);
+//     const userId = ctx.from.id;
+//     try {
+//       // Получаем информацию о пользователе в канале
+//       const memberInfo = await ctx.api.getChatMember(infoChannelId, userId);
+
+//       // Проверяем статус подписки
+//       if (
+//         memberInfo.status === "member" ||
+//         memberInfo.status === "administrator" ||
+//         memberInfo.status === "creator"
+//       ) {
+//         await ctx.reply(texts.WELCOME, {
+//           reply_markup: defaultKeyboard,
+          
+//         });
+//       } else {
+//         const inlineKeyboard = new InlineKeyboard().url(
+//             "Подписаться на канал",
+//             infoChannelLink
+//           )
+//         .text("Я подписался", "subscribed");
+
+//         await ctx.reply("Вы не подписаны на канал, пожалуйста, подпишитесь.", {
+//           reply_markup:inlineKeyboard
+//         });
+//       }
+//     } catch (error) {
+//       // Ошибка, если пользователь не найден или канал недоступен
+//       await ctx.reply("Не удалось проверить подписку, попробуйте позже.");
+//       console.error(error);
+//     }
+//   }
+// });
 bot.command("start", async (ctx) => {
   // console.log(ctx.from)
   if (ctx.chat.type !== "group" && ctx.chat.type !== "channel") {
     clearSession(ctx.from.id);
     const userId = ctx.from.id;
-    try {
-      // Получаем информацию о пользователе в канале
-      const memberInfo = await ctx.api.getChatMember(infoChannelId, userId);
-
-      // Проверяем статус подписки
-      if (
-        memberInfo.status === "member" ||
-        memberInfo.status === "administrator" ||
-        memberInfo.status === "creator"
-      ) {
         await ctx.reply(texts.WELCOME, {
           reply_markup: defaultKeyboard,
           
         });
-      } else {
-        const inlineKeyboard = new InlineKeyboard().url(
-            "Подписаться на канал",
-            infoChannelLink
-          )
-        .text("Я подписался", "subscribed");
-
-        await ctx.reply("Вы не подписаны на канал, пожалуйста, подпишитесь.", {
-          reply_markup:inlineKeyboard
-        });
-      }
-    } catch (error) {
-      // Ошибка, если пользователь не найден или канал недоступен
-      await ctx.reply("Не удалось проверить подписку, попробуйте позже.");
-      console.error(error);
-    }
   }
 });
 bot.callbackQuery("subscribed", async (ctx) => {
@@ -398,7 +410,7 @@ bot.on("msg:text", async (ctx) => {
   if (session.isCashWritten&&session.isRefill) {
     if (typeof textToNumber === "number") {
       // console.log("text is number");
-      if (text.length === requiredCount) {
+      if (text.length >= minRequiredXbetIdCount && text.length<=maxRequiredXbetIdCount) {
         // console.log(text.length, "кол-во символов");
         session.isCashWritten = false;
         session.xbetIdGlobal = text;
@@ -419,7 +431,7 @@ bot.on("msg:text", async (ctx) => {
           }
           return (session.waitCheck = true);
       } else {
-        await ctx.reply(`Кол-во цифр должно равняться ${requiredCount}`);
+        await ctx.reply(`Кол-во цифр должно быть больше или равно ${minRequiredXbetIdCount} или меньше или равно ${maxRequiredXbetIdCount}`);
       }
     } else {
       await ctx.reply("Нужно ввести только цифры");
@@ -471,7 +483,7 @@ bot.on("msg:text", async (ctx) => {
 
   if (session.isOutput && session.isXbetKeyWritten) {
     if (typeof textToNumber === "number") {
-      if(text.length === requiredCount){
+      if(text.length >= minRequiredXbetIdCount && text.length<=maxRequiredXbetIdCount){
         session.isXbetKeyWritten = false;
         session.isCashWritten = true;
         session.xbetIdGlobal = text;
@@ -491,7 +503,7 @@ bot.on("msg:text", async (ctx) => {
         // });
         return await ctx.reply("Введите код который вам дал 1XBET");
       }else{
-        await ctx.reply(`Кол-во цифр должно равняться ${requiredCount}`);
+        await ctx.reply(`Кол-во цифр должно быть больше или равно ${minRequiredXbetIdCount} или меньше или равно ${maxRequiredXbetIdCount}`);
       }
     } else {
       await ctx.reply("Введите сумму цифрами");
