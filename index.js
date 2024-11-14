@@ -78,54 +78,56 @@ const defaultKeyboard = new Keyboard()
 
 const cancelKeyboard = new Keyboard().text("Отмена").resized();
 
-// bot.command("start", async (ctx) => {
-//   // console.log(ctx.from)
-//   if (ctx.chat.type !== "group" && ctx.chat.type !== "channel") {
-//     clearSession(ctx.from.id);
-//     const userId = ctx.from.id;
-//     try {
-//       // Получаем информацию о пользователе в канале
-//       const memberInfo = await ctx.api.getChatMember(infoChannelId, userId);
-
-//       // Проверяем статус подписки
-//       if (
-//         memberInfo.status === "member" ||
-//         memberInfo.status === "administrator" ||
-//         memberInfo.status === "creator"
-//       ) {
-//         await ctx.reply(texts.WELCOME, {
-//           reply_markup: defaultKeyboard,
-          
-//         });
-//       } else {
-//         const inlineKeyboard = new InlineKeyboard().url(
-//             "Подписаться на канал",
-//             infoChannelLink
-//           )
-//         .text("Я подписался", "subscribed");
-
-//         await ctx.reply("Вы не подписаны на канал, пожалуйста, подпишитесь.", {
-//           reply_markup:inlineKeyboard
-//         });
-//       }
-//     } catch (error) {
-//       // Ошибка, если пользователь не найден или канал недоступен
-//       await ctx.reply("Не удалось проверить подписку, попробуйте позже.");
-//       console.error(error);
-//     }
-//   }
-// });
 bot.command("start", async (ctx) => {
   // console.log(ctx.from)
   if (ctx.chat.type !== "group" && ctx.chat.type !== "channel") {
     clearSession(ctx.from.id);
     const userId = ctx.from.id;
+    try {
+      // Получаем информацию о пользователе в канале
+      const memberInfo = await ctx.api.getChatMember(infoChannelId, userId);
+
+      // Проверяем статус подписки
+      if (
+        memberInfo.status === "member" ||
+        memberInfo.status === "administrator" ||
+        memberInfo.status === "creator"
+      ) {
         await ctx.reply(texts.WELCOME, {
           reply_markup: defaultKeyboard,
           
         });
+      } else {
+        const inlineKeyboard = new InlineKeyboard().url(
+            "Подписаться на канал",
+            infoChannelLink
+          )
+        .text("Я подписался", "subscribed");
+
+        await ctx.reply("Вы не подписаны на канал, пожалуйста, подпишитесь.", {
+          reply_markup:inlineKeyboard
+        });
+      }
+    } catch (error) {
+      // Ошибка, если пользователь не найден или канал недоступен
+      await ctx.reply("Не удалось проверить подписку, попробуйте позже.");
+      console.error(error);
+    }
   }
 });
+
+// bot.command("start", async (ctx) => {
+//   // console.log(ctx.from)
+//   if (ctx.chat.type !== "group" && ctx.chat.type !== "channel") {
+//     clearSession(ctx.from.id);
+//     const userId = ctx.from.id;
+//         await ctx.reply(texts.WELCOME, {
+//           reply_markup: defaultKeyboard,
+          
+//         });
+//   }
+// });
+
 bot.callbackQuery("subscribed", async (ctx) => {
   clearSession(ctx.from.id);
   if (ctx.chat.type !== "group") {
