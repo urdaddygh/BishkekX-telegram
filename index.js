@@ -66,7 +66,7 @@ const thirdBankName = 'Optima';
 let mbankRequisites = '0500229666';
 let optimaRequisites = '4169585353587065';
 let bakaiRequisites = '(0500) 047-902';
-let oDengiRequisites = '(0706) 425-145';
+let oDengiRequisites = '(0509) 021-244';
 let shift = 'Не выбран';
 
 const defaultKeyboard = new Keyboard()
