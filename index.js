@@ -59,11 +59,14 @@ const minSumOutput = 150;
 const maxSum = 1000000;
 const maxRequiredXbetIdCount = 12;
 const minRequiredXbetIdCount = 9;
+const firstBankName = 'oDengi';
+const secondBankName = 'Bakai';
+const thirdBankName = 'Optima';
 
 let mbankRequisites = '0500229666';
-let optimaRequisites = '4169585355144709';
-let bakaiRequisites = '0500229666';
-let oDengi = '+996 (504) 061-111';
+let optimaRequisites = '4169585353587065';
+let bakaiRequisites = '(0500) 047-902';
+let oDengiRequisites = '(0706) 425-145';
 let shift = 'Не выбран';
 
 const defaultKeyboard = new Keyboard()
@@ -163,27 +166,27 @@ bot.callbackQuery("subscribed", async (ctx) => {
   }
 });
 
-bot.command("edil", async (ctx) => {
-  if (ctx.chat.type === "group") {
-    shift = 'Эдил';
-    mbankRequisites='0500229666';
-    optimaRequisites='4169585355144709';
-    oDengi = '+996 (504) 061-111';
-    bakaiRequisites='0500229666';
-    await ctx.reply("Приветствую Эдил, переключаю на вашу смену");
-  }
-});
+// bot.command("edil", async (ctx) => {
+//   if (ctx.chat.type === "group") {
+//     shift = 'Эдил';
+//     mbankRequisites='0500229666';
+//     optimaRequisites='4169585355144709';
+//     oDengi = '+996 (504) 061-111';
+//     bakaiRequisites='0500229666';
+//     await ctx.reply("Приветствую Эдил, переключаю на вашу смену");
+//   }
+// });
 
-bot.command("daniyar", async (ctx) => {
-  if (ctx.chat.type === "group") {
-    shift = 'Данияр';
-    mbankRequisites='0504061111';
-    optimaRequisites='4169585351289654';
-    oDengi = '-';
-    bakaiRequisites='7760611111';
-    await ctx.reply("Приветствую Данияр, переключаю на вашу смену");
-  }
-});
+// bot.command("daniyar", async (ctx) => {
+//   if (ctx.chat.type === "group") {
+//     shift = 'Данияр';
+//     mbankRequisites='0504061111';
+//     optimaRequisites='4169585351289654';
+//     oDengi = '-';
+//     bakaiRequisites='7760611111';
+//     await ctx.reply("Приветствую Данияр, переключаю на вашу смену");
+//   }
+// });
 
 // bot.command("test", async (ctx) => {
 //   console.log(ctx)
@@ -209,9 +212,10 @@ bot.hears("ПОПОЛНИТЬ", async (ctx) => {
   });
   // console.log("after", session);
   const inlineKeyboard = new InlineKeyboard()
-    .text("MBANK", "mbank_button")
-    .text("Bakai", "bakai_button")
-    .text("Optima", "optima_button");
+    // .text("MBANK", "mbank_button")
+    .text(texts.ODENGI, "first_reffil_button")
+    .text(texts.BAKAI, "second_reffil_button")
+    .text(texts.OPTIMA, "third_reffil_button");
 
   session.isRefill = true;
 
@@ -220,25 +224,25 @@ bot.hears("ПОПОЛНИТЬ", async (ctx) => {
   });
 });
 
-bot.callbackQuery("mbank_button", async (ctx) => {
+bot.callbackQuery("first_reffil_button", async (ctx) => {
   const session = getSession(ctx.from.id);
-    await ctx.reply("Вы выбрали MBANK, укажите сумму пополнения(СОМ)");
+    await ctx.reply(`Вы выбрали ${texts.ODENGI}, укажите сумму пополнения(СОМ)`);
     session.isBankChosen = true;
-    session.bank = 'MBANK';
+    session.bank = firstBankName;
     await ctx.deleteMessage();
 });
-bot.callbackQuery("bakai_button", async (ctx) => {
+bot.callbackQuery("second_reffil_button", async (ctx) => {
   const session = getSession(ctx.from.id);
-    await ctx.reply("Вы выбрали Bakai, укажите сумму пополнения(СОМ)");
+    await ctx.reply(`Вы выбрали ${texts.BAKAI}, укажите сумму пополнения(СОМ)`);
     session.isBankChosen = true;
-    session.bank = 'Bakai';
+    session.bank = secondBankName;
     await ctx.deleteMessage();
 });
-bot.callbackQuery("optima_button", async (ctx) => {
+bot.callbackQuery("third_reffil_button", async (ctx) => {
   const session = getSession(ctx.from.id);
-    await ctx.reply("Вы выбрали Optima, укажите сумму пополнения(СОМ)");
+    await ctx.reply(`Вы выбрали ${texts.OPTIMA}, укажите сумму пополнения(СОМ)`);
     session.isBankChosen = true;
-    session.bank = 'Optima';
+    session.bank = thirdBankName;
     await ctx.deleteMessage();
 });
 
@@ -252,9 +256,9 @@ bot.hears("ВЫВЕСТИ", async (ctx) => {
   });
 
   const inlineKeyboard = new InlineKeyboard()
-    .text("MBANK", "mbank_button_output")
-    .text("Bakai", "bakai_button_output")
-    .text("Optima", "optima_button_output");
+    .text(texts.ODENGI, "first_output_button")
+    .text(texts.BAKAI, "second_output_button")
+    .text(texts.OPTIMA, "third_output_button");
     const session = getSession(ctx.from.id);
 
     session.isOutput = true;
@@ -264,23 +268,23 @@ bot.hears("ВЫВЕСТИ", async (ctx) => {
   });
 });
 
-bot.callbackQuery("mbank_button_output", async (ctx) => {
+bot.callbackQuery("first_output_button", async (ctx) => {
   const session = getSession(ctx.from.id);
   await ctx.reply(texts.ENTER_REQUISITES_BY_BANK);
   session.isBankChosen = true;
-  session.bank = 'MBANK';
+  session.bank = firstBankName;
 });
-bot.callbackQuery("bakai_button_output", async (ctx) => {
+bot.callbackQuery("second_output_button", async (ctx) => {
   const session = getSession(ctx.from.id);
   await ctx.reply(texts.ENTER_REQUISITES_BY_BANK);
   session.isBankChosen = true;
-  session.bank = 'Bakai';
+  session.bank = secondBankName;
 });
-bot.callbackQuery("optima_button_output", async (ctx) => {
+bot.callbackQuery("third_output_button", async (ctx) => {
   const session = getSession(ctx.from.id);
   await ctx.reply(texts.ENTER_REQUISITES_BY_BANK);
   session.isBankChosen = true;
-  session.bank = 'Optima';
+  session.bank = thirdBankName;
   // console.log(session);
 });
 
@@ -416,17 +420,20 @@ bot.on("msg:text", async (ctx) => {
         // console.log(text.length, "кол-во символов");
         session.isCashWritten = false;
         session.xbetIdGlobal = text;
-          if (session.bank === "MBANK") {
+          if (session.bank === firstBankName) {
+            // await ctx.reply(
+            //   `Пополните средства на MBANK по нижеуказанному реквизиту👇\nMBANK: ${mbankRequisites}\nСумма: ${session.sumMany}\n\nОтправьте скриншот чека`
+            // );
             await ctx.reply(
-              `Пополните средства на MBANK по нижеуказанному реквизиту👇\nMBANK: ${mbankRequisites}\nСумма: ${session.sumMany}\n\nОтправьте скриншот чека`
+              `Пополните средства на ${texts.ODENGI} по нижеуказанному реквизиту👇\n${texts.ODENGI}: ${oDengiRequisites}\nСумма: ${session.sumMany}\n\nОтправьте скриншот чека`
             );
           }
-          if (session.bank === "Bakai") {
+          if (session.bank === secondBankName) {
             await ctx.reply(
               `Пополните средства на Bakai по нижеуказанному реквизиту👇\nBakai: ${bakaiRequisites}\nСумма: ${session.sumMany}\n\nОтправьте скриншот чека`
             );
           }
-          if (session.bank === "Optima") {
+          if (session.bank === thirdBankName) {
             await ctx.reply(
               `Пополните средства на Optima по нижеуказанному реквизиту👇\nOptima: ${optimaRequisites}\nСумма: ${session.sumMany}\n\nОтправьте скриншот чека`
             );
